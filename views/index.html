@@ -1,0 +1,846 @@
+<title>Catalog Admin Views</title>
+<style>
+  :root {
+    /* Raw palette stops — same values used by the Button/Alert/Badge/Breadcrumb/Dropdown components in projects-story-book */
+    --blue-50:#eff6ff; --blue-200:#bfdbfe; --blue-400:#60a5fa; --blue-500:#3b82f6; --blue-600:#2563eb; --blue-700:#1d4ed8; --blue-800:#1e40af; --blue-950:#172554;
+    --gray-50:#f9fafb; --gray-100:#f3f4f6; --gray-200:#e5e7eb; --gray-300:#d1d5db; --gray-400:#9ca3af; --gray-500:#6b7280; --gray-600:#4b5563; --gray-700:#374151; --gray-800:#1f2937; --gray-900:#111827; --gray-950:#030712;
+    --green-50:#f0fdf4; --green-200:#bbf7d0; --green-400:#4ade80; --green-500:#22c55e; --green-600:#16a34a; --green-700:#15803d; --green-800:#166534; --green-950:#052e16;
+    --red-50:#fef2f2; --red-200:#fecaca; --red-400:#f87171; --red-500:#ef4444; --red-600:#dc2626; --red-700:#b91c1c; --red-800:#991b1b; --red-950:#450a0a;
+    --amber-50:#fffbeb; --amber-200:#fde68a; --amber-300:#fcd34d; --amber-400:#fbbf24; --amber-500:#f59e0b; --amber-600:#d97706; --amber-900:#78350f; --amber-950:#451a03;
+    --sky-50:#f0f9ff; --sky-200:#bae6fd; --sky-400:#38bdf8; --sky-500:#0ea5e9; --sky-600:#0284c7; --sky-700:#0369a1; --sky-800:#075985; --sky-950:#082f49;
+
+    /* Page-level tokens: light theme */
+    --surface:#ffffff;
+    --surface-raised:#ffffff;
+    --border: var(--gray-200);
+    --ink: var(--gray-900);
+    --ink-muted: var(--gray-500);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --surface: var(--gray-950);
+      --surface-raised: var(--gray-900);
+      --border: var(--gray-700);
+      --ink: var(--gray-100);
+      --ink-muted: var(--gray-400);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --surface: var(--gray-950);
+    --surface-raised: var(--gray-900);
+    --border: var(--gray-700);
+    --ink: var(--gray-100);
+    --ink-muted: var(--gray-400);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+  }
+  h1, h2, h3 { margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  button { font-family: inherit; }
+
+  .shell { display: flex; min-height: 100%; }
+
+  /* ---- Sidebar ---- */
+  .sidebar {
+    width: 220px;
+    flex: none;
+    background: var(--surface-raised);
+    border-right: 1px solid var(--border);
+    padding: 1.25rem 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .brand { font-weight: 800; font-size: 0.9375rem; padding: 0 0.5rem; letter-spacing: -0.01em; }
+  .brand span { color: var(--blue-600); }
+  .dark .brand span { color: var(--blue-400); }
+  .nav-group { display: flex; flex-direction: column; gap: 0.125rem; }
+  .nav-label { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-muted); padding: 0 0.5rem; margin-bottom: 0.25rem; }
+  .nav-link {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 0.625rem; border-radius: 0.5rem;
+    color: var(--ink); text-decoration: none; font-size: 0.875rem; font-weight: 500;
+    cursor: pointer; border: 0; background: none; width: 100%; text-align: left;
+  }
+  .nav-link:hover { background: var(--gray-100); }
+  .dark .nav-link:hover { background: var(--gray-800); }
+  .nav-link.active { background: var(--blue-50); color: var(--blue-800); font-weight: 600; }
+  .dark .nav-link.active { background: var(--blue-950); color: var(--blue-200); }
+  .nav-link svg { flex: none; width: 16px; height: 16px; }
+
+  /* ---- Main content ---- */
+  .content { flex: 1; min-width: 0; padding: 1.75rem 2rem 3rem; max-width: 960px; }
+  .view-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
+  .view-header h1 { font-size: 1.375rem; font-weight: 700; }
+  .view-subtitle { color: var(--ink-muted); font-size: 0.8125rem; margin-top: 0.25rem; }
+
+  .card { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 0.875rem; }
+  .card + .card { margin-top: 1rem; }
+  .card-pad { padding: 1.25rem 1.5rem; }
+
+  /* ---- Breadcrumb (Breadcrumb component) ---- */
+  .crumb { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 0 0 0.875rem; padding: 0; font-size: 0.8125rem; color: var(--ink-muted); }
+  .crumb li { display: flex; align-items: center; gap: 0.5rem; }
+  .crumb a { color: inherit; text-decoration: none; cursor: pointer; }
+  .crumb a:hover { color: var(--ink); text-decoration: underline; }
+  .crumb .current { font-weight: 600; color: var(--ink); }
+
+  /* ---- Button (Button component) ---- */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.375rem; cursor: pointer; border-radius: 9999px; border: 0; font-weight: 700; line-height: 1; font-family: inherit; transition: background-color .15s ease, color .15s ease, box-shadow .15s ease; white-space: nowrap; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-sm { padding: 0.625rem 1rem; font-size: 0.75rem; }
+  .btn-md { padding: 0.6875rem 1.25rem; font-size: 0.875rem; }
+  .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+  .btn-primary { background: var(--blue-600); color: #fff; }
+  .btn-primary:hover { background: var(--blue-700); }
+  .dark .btn-primary { background: var(--blue-500); }
+  .dark .btn-primary:hover { background: var(--blue-400); }
+  .btn-secondary { background: transparent; color: var(--gray-800); box-shadow: inset 0 0 0 1px rgba(0,0,0,.15); }
+  .btn-secondary:hover { background: var(--gray-50); }
+  .dark .btn-secondary { color: var(--gray-100); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+  .dark .btn-secondary:hover { background: var(--gray-800); }
+  .btn-danger { background: var(--red-600); color: #fff; }
+  .btn-danger:hover { background: var(--red-700); }
+  .dark .btn-danger { background: var(--red-500); }
+  .dark .btn-danger:hover { background: var(--red-400); }
+
+  /* ---- ButtonClose (ButtonClose component) ---- */
+  .btn-close { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; border-radius: 9999px; border: 0; background: transparent; color: var(--gray-500); transition: background-color .15s ease, color .15s ease; flex: none; }
+  .btn-close:hover { background: var(--gray-200); color: var(--gray-700); }
+  .dark .btn-close { color: var(--gray-400); }
+  .dark .btn-close:hover { background: var(--gray-700); color: var(--gray-200); }
+  .btn-close-sm { padding: 0.25rem; }
+  .btn-close-sm svg { width: 14px; height: 14px; }
+
+  /* ---- Badge (Badge component) ---- */
+  .badge { display: inline-flex; align-items: center; border-radius: 9999px; border: 1px solid; padding: 0.125rem 0.625rem; font-size: 0.75rem; font-weight: 600; line-height: 1.4; white-space: nowrap; }
+  .badge-success { background: var(--green-50); color: var(--green-800); border-color: var(--green-200); }
+  .dark .badge-success { background: var(--green-950); color: var(--green-200); border-color: var(--green-800); }
+  .badge-warning { background: var(--amber-50); color: var(--amber-900); border-color: var(--amber-200); }
+  .dark .badge-warning { background: var(--amber-950); color: var(--amber-200); border-color: var(--amber-900); }
+  .badge-secondary { background: var(--gray-50); color: var(--gray-800); border-color: var(--gray-200); }
+  .dark .badge-secondary { background: var(--gray-800); color: var(--gray-100); border-color: var(--gray-700); }
+
+  /* ---- Alert (Alert component) ---- */
+  .alert { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; border-radius: 0.75rem; border: 1px solid; padding: 0.75rem 1rem; font-size: 0.875rem; margin-bottom: 1rem; }
+  .alert-info { background: var(--sky-50); color: var(--sky-800); border-color: var(--sky-200); }
+  .dark .alert-info { background: var(--sky-950); color: var(--sky-200); border-color: var(--sky-800); }
+  .alert-success { background: var(--green-50); color: var(--green-800); border-color: var(--green-200); }
+  .dark .alert-success { background: var(--green-950); color: var(--green-200); border-color: var(--green-800); }
+  .alert-danger { background: var(--red-50); color: var(--red-800); border-color: var(--red-200); }
+  .dark .alert-danger { background: var(--red-950); color: var(--red-200); border-color: var(--red-800); }
+
+  /* ---- Dropdown (Dropdown component) ---- */
+  .menu-wrap { position: relative; display: inline-block; }
+  .menu-panel { position: absolute; right: 0; z-index: 10; margin-top: 0.5rem; min-width: 10rem; border-radius: 0.75rem; border: 1px solid var(--border); background: var(--surface-raised); padding: 0.25rem 0; box-shadow: 0 10px 15px -3px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.06); }
+  .menu-item { display: block; width: 100%; text-align: left; padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--gray-700); background: transparent; border: 0; cursor: pointer; }
+  .menu-item:hover { background: var(--gray-100); }
+  .dark .menu-item { color: var(--gray-200); }
+  .dark .menu-item:hover { background: var(--gray-800); }
+  .menu-item.danger { color: var(--red-600); }
+  .dark .menu-item.danger { color: var(--red-400); }
+  .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 9999px; border: 0; background: transparent; color: var(--ink-muted); cursor: pointer; }
+  .icon-btn:hover { background: var(--gray-100); color: var(--ink); }
+  .dark .icon-btn:hover { background: var(--gray-800); }
+
+  /* ---- New: data table (not in projects-story-book yet) ---- */
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+  thead th { text-align: left; padding: 0.75rem 1.5rem; color: var(--ink-muted); font-weight: 600; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr:hover td { background: rgba(37,99,235,0.04); }
+  .dark tbody tr:hover td { background: rgba(59,130,246,0.07); }
+  .cell-title { font-weight: 600; }
+  .cell-muted { color: var(--ink-muted); }
+  .num { font-variant-numeric: tabular-nums; }
+  .row-thumb { width: 2.25rem; height: 2.25rem; border-radius: 0.5rem; background: linear-gradient(135deg, var(--gray-100), var(--gray-200)); display: flex; align-items: center; justify-content: center; color: var(--gray-400); flex: none; }
+  .dark .row-thumb { background: linear-gradient(135deg, var(--gray-800), var(--gray-700)); color: var(--gray-500); }
+  .row-thumb svg { width: 16px; height: 16px; }
+  .title-cell { display: flex; align-items: center; gap: 0.75rem; }
+
+  /* ---- New: filter bar / form inputs (not in projects-story-book yet) ---- */
+  .filter-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1rem; }
+  .field { display: flex; flex-direction: column; gap: 0.375rem; }
+  .field label { font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); }
+  select, input[type="text"], input[type="date"], textarea {
+    font: inherit; font-size: 0.875rem; padding: 0.5rem 0.75rem; border-radius: 0.5rem;
+    border: 1px solid var(--border); background: var(--surface); color: var(--ink);
+  }
+  select:focus-visible, input:focus-visible, textarea:focus-visible, button:focus-visible {
+    outline: 2px solid var(--blue-600); outline-offset: 1px;
+  }
+  textarea { resize: vertical; min-height: 5rem; font-family: inherit; }
+  .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 1rem; }
+  .form-grid .span-2 { grid-column: 1 / -1; }
+  @media (max-width: 620px) { .form-grid { grid-template-columns: 1fr; } }
+
+  /* ---- New: pagination (not in projects-story-book yet) ---- */
+  .pagination { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.5rem; color: var(--ink-muted); font-size: 0.8125rem; }
+
+  /* ---- New: tabs (not in projects-story-book yet) ---- */
+  .tabs { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--border); padding: 0 1.5rem; }
+  .tab { padding: 0.875rem 0; font-size: 0.8125rem; font-weight: 600; color: var(--ink-muted); background: none; border: 0; border-bottom: 2px solid transparent; cursor: pointer; margin-bottom: -1px; }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--blue-600); border-color: var(--blue-600); }
+  .dark .tab.active { color: var(--blue-400); border-color: var(--blue-400); }
+  .tab-panel { display: none; padding: 1.5rem; }
+  .tab-panel.active { display: block; }
+
+  /* ---- New: image gallery (not in projects-story-book yet) ---- */
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; }
+  .gallery-item { aspect-ratio: 1; border-radius: 0.75rem; border: 1px solid var(--border); background: linear-gradient(135deg, var(--gray-100), var(--gray-200)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.375rem; color: var(--gray-400); font-size: 0.6875rem; position: relative; }
+  .dark .gallery-item { background: linear-gradient(135deg, var(--gray-800), var(--gray-700)); color: var(--gray-500); }
+  .gallery-pos { position: absolute; top: 0.375rem; left: 0.375rem; background: rgba(0,0,0,.55); color: #fff; font-size: 0.625rem; font-weight: 700; padding: 0.0625rem 0.375rem; border-radius: 9999px; }
+
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem 1.5rem; }
+  .info-grid dt { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); font-weight: 700; margin-bottom: 0.25rem; }
+  .info-grid dd { margin: 0; font-size: 0.875rem; }
+
+  .section-title { font-size: 0.9375rem; font-weight: 700; padding: 1.25rem 1.5rem 0; }
+  .section-hint { color: var(--ink-muted); font-size: 0.8125rem; padding: 0.25rem 1.5rem 1rem; }
+
+  .add-row { display: flex; gap: 0.5rem; padding: 1rem 1.5rem; border-top: 1px solid var(--border); }
+  .add-row input { flex: 1; }
+
+  [data-view] { display: block; }
+  [data-view][hidden] { display: none; }
+
+  @media (max-width: 720px) {
+    .shell { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--border); }
+    .nav-group { flex-direction: row; }
+    .content { padding: 1.25rem 1rem 2.5rem; }
+  }
+</style>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">Northbound<span>.</span>Admin</div>
+    <nav class="nav-group">
+      <div class="nav-label">Catalog</div>
+      <button class="nav-link" data-nav="products-list" data-section="products">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Products
+      </button>
+      <button class="nav-link" data-nav="collections-list" data-section="collections">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v4H4z"/><path d="M6 8v11a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8"/><path d="M10 12h4"/></svg>
+        Collections
+      </button>
+    </nav>
+  </aside>
+
+  <main class="content">
+
+    <!-- ================= PRODUCTS — LIST (GET /products) ================= -->
+    <section id="view-products-list" data-view>
+      <div class="view-header">
+        <div>
+          <h1>Products</h1>
+          <p class="view-subtitle">6 products across 3 vendors</p>
+        </div>
+        <button class="btn btn-md btn-primary" data-nav="products-new">Add product</button>
+      </div>
+
+      <div class="filter-bar">
+        <div class="field">
+          <label for="f-status">Status</label>
+          <select id="f-status" data-filter="status">
+            <option value="">All statuses</option>
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-vendor">Vendor</label>
+          <select id="f-vendor" data-filter="vendor">
+            <option value="">All vendors</option>
+            <option value="Apparel Co.">Apparel Co.</option>
+            <option value="Northbound Gear">Northbound Gear</option>
+            <option value="Home &amp; Table">Home &amp; Table</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="table-scroll">
+          <table id="products-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Vendor</th>
+                <th>Status</th>
+                <th>Price</th>
+                <th>Variants</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-status="active" data-vendor="Apparel Co.">
+                <td>
+                  <div class="title-cell">
+                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
+                    <div><div class="cell-title">Classic Cotton Tee</div><div class="cell-muted">classic-cotton-tee</div></div>
+                  </div>
+                </td>
+                <td>Apparel Co.</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td class="num">$18.00 – $24.00</td>
+                <td class="num">3</td>
+                <td>
+                  <div class="menu-wrap" data-dropdown>
+                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+                    </button>
+                    <ul class="menu-panel" role="menu" hidden>
+                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
+                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
+                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              <tr data-status="active" data-vendor="Northbound Gear">
+                <td>
+                  <div class="title-cell">
+                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
+                    <div><div class="cell-title">Trail Runner Sneaker</div><div class="cell-muted">trail-runner-sneaker</div></div>
+                  </div>
+                </td>
+                <td>Northbound Gear</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td class="num">$89.00 – $110.00</td>
+                <td class="num">4</td>
+                <td>
+                  <div class="menu-wrap" data-dropdown>
+                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+                    </button>
+                    <ul class="menu-panel" role="menu" hidden>
+                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
+                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
+                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              <tr data-status="draft" data-vendor="Home &amp; Table">
+                <td>
+                  <div class="title-cell">
+                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
+                    <div><div class="cell-title">Ceramic Pour-Over Mug</div><div class="cell-muted">ceramic-pour-over-mug</div></div>
+                  </div>
+                </td>
+                <td>Home &amp; Table</td>
+                <td><span class="badge badge-warning">Draft</span></td>
+                <td class="num">$22.00</td>
+                <td class="num">1</td>
+                <td>
+                  <div class="menu-wrap" data-dropdown>
+                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+                    </button>
+                    <ul class="menu-panel" role="menu" hidden>
+                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
+                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
+                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              <tr data-status="active" data-vendor="Northbound Gear">
+                <td>
+                  <div class="title-cell">
+                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
+                    <div><div class="cell-title">Merino Wool Beanie</div><div class="cell-muted">merino-wool-beanie</div></div>
+                  </div>
+                </td>
+                <td>Northbound Gear</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td class="num">$28.00</td>
+                <td class="num">2</td>
+                <td>
+                  <div class="menu-wrap" data-dropdown>
+                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+                    </button>
+                    <ul class="menu-panel" role="menu" hidden>
+                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
+                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
+                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              <tr data-status="archived" data-vendor="Apparel Co.">
+                <td>
+                  <div class="title-cell">
+                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
+                    <div><div class="cell-title">Canvas Tote Bag</div><div class="cell-muted">canvas-tote-bag</div></div>
+                  </div>
+                </td>
+                <td>Apparel Co.</td>
+                <td><span class="badge badge-secondary">Archived</span></td>
+                <td class="num">$16.00</td>
+                <td class="num">1</td>
+                <td>
+                  <div class="menu-wrap" data-dropdown>
+                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+                    </button>
+                    <ul class="menu-panel" role="menu" hidden>
+                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
+                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
+                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+              <tr data-status="active" data-vendor="Home &amp; Table">
+                <td>
+                  <div class="title-cell">
+                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
+                    <div><div class="cell-title">Insulated Water Bottle</div><div class="cell-muted">insulated-water-bottle</div></div>
+                  </div>
+                </td>
+                <td>Home &amp; Table</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td class="num">$32.00 – $38.00</td>
+                <td class="num">2</td>
+                <td>
+                  <div class="menu-wrap" data-dropdown>
+                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+                    </button>
+                    <ul class="menu-panel" role="menu" hidden>
+                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
+                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
+                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
+                    </ul>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span>Showing 1–6 of 6</span>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-sm btn-secondary" disabled>Previous</button>
+            <button class="btn btn-sm btn-secondary" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PRODUCTS — CREATE (POST /products) ================= -->
+    <section id="view-products-new" data-view hidden>
+      <ul class="crumb">
+        <li><a data-nav="products-list">Products</a></li>
+        <li aria-hidden="true">/</li>
+        <li class="current" aria-current="page">New product</li>
+      </ul>
+
+      <div class="alert alert-info" id="new-product-tip">
+        <span>Changes are saved as a draft until you set the status to Active and publish.</span>
+        <button class="btn-close btn-close-sm" aria-label="Dismiss" data-dismiss-alert>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="card card-pad">
+        <div class="form-grid">
+          <div class="field span-2">
+            <label for="np-title">Title</label>
+            <input type="text" id="np-title" placeholder="e.g. Merino Wool Beanie">
+          </div>
+          <div class="field">
+            <label for="np-slug">Slug</label>
+            <input type="text" id="np-slug" placeholder="merino-wool-beanie">
+          </div>
+          <div class="field">
+            <label for="np-vendor">Vendor</label>
+            <input type="text" id="np-vendor" placeholder="e.g. Northbound Gear">
+          </div>
+          <div class="field">
+            <label for="np-type">Product type</label>
+            <input type="text" id="np-type" placeholder="e.g. Accessories">
+          </div>
+          <div class="field">
+            <label for="np-status">Status</label>
+            <select id="np-status">
+              <option value="draft">Draft</option>
+              <option value="active">Active</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+          <div class="field span-2">
+            <label for="np-desc">Description</label>
+            <textarea id="np-desc" placeholder="A short description shown on the product page."></textarea>
+          </div>
+          <div class="field">
+            <label for="np-pub">Published at</label>
+            <input type="date" id="np-pub">
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:0.75rem; margin-top:1.25rem;">
+        <button class="btn btn-md btn-primary" data-action="save-product">Save product</button>
+        <button class="btn btn-md btn-secondary" data-nav="products-list">Cancel</button>
+      </div>
+    </section>
+
+    <!-- ================= PRODUCTS — DETAIL (GET /products/{id} + sub-resources) ================= -->
+    <section id="view-products-detail" data-view hidden>
+      <ul class="crumb">
+        <li><a data-nav="products-list">Products</a></li>
+        <li aria-hidden="true">/</li>
+        <li class="current" aria-current="page">Trail Runner Sneaker</li>
+      </ul>
+
+      <div class="view-header">
+        <div>
+          <h1 style="display:flex; align-items:center; gap:0.625rem;">Trail Runner Sneaker <span class="badge badge-success">Active</span></h1>
+          <p class="view-subtitle">Northbound Gear · Footwear · Published Mar 14, 2026</p>
+        </div>
+        <div style="display:flex; gap:0.5rem;">
+          <button class="btn btn-md btn-secondary" data-nav="products-new">Edit</button>
+          <div class="menu-wrap" data-dropdown>
+            <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Product actions">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
+            </button>
+            <ul class="menu-panel" role="menu" hidden>
+              <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
+              <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-product">Delete product</button></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tabs" role="tablist">
+          <button class="tab active" role="tab" data-tab="info">Info</button>
+          <button class="tab" role="tab" data-tab="options">Options</button>
+          <button class="tab" role="tab" data-tab="variants">Variants</button>
+          <button class="tab" role="tab" data-tab="images">Images</button>
+        </div>
+
+        <div class="tab-panel active" data-tab-panel="info">
+          <dl class="info-grid">
+            <div><dt>Slug</dt><dd>trail-runner-sneaker</dd></div>
+            <div><dt>Vendor</dt><dd>Northbound Gear</dd></div>
+            <div><dt>Product type</dt><dd>Footwear</dd></div>
+            <div><dt>Status</dt><dd><span class="badge badge-success">Active</span></dd></div>
+            <div><dt>Published at</dt><dd>2026-03-14</dd></div>
+            <div class="span-2" style="grid-column:1/-1;"><dt>Description</dt><dd>A lightweight trail running shoe built for uneven terrain, with a grippy rubber outsole and breathable mesh upper.</dd></div>
+          </dl>
+        </div>
+
+        <div class="tab-panel" data-tab-panel="options">
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Name</th><th>Position</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-title">Size</td><td class="num">1</td></tr>
+                <tr><td class="cell-title">Color</td><td class="num">2</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-tab-panel="variants">
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>SKU</th><th>Title</th><th>Price</th><th>Compare-at</th><th>Position</th></tr></thead>
+              <tbody>
+                <tr><td class="cell-muted">NR-TRS-9-SLATE</td><td>9 / Slate</td><td class="num">$89.00</td><td class="num cell-muted">$110.00</td><td class="num">1</td></tr>
+                <tr><td class="cell-muted">NR-TRS-10-SLATE</td><td>10 / Slate</td><td class="num">$89.00</td><td class="num cell-muted">$110.00</td><td class="num">2</td></tr>
+                <tr><td class="cell-muted">NR-TRS-9-MOSS</td><td>9 / Moss</td><td class="num">$92.00</td><td class="num cell-muted">—</td><td class="num">3</td></tr>
+                <tr><td class="cell-muted">NR-TRS-10-MOSS</td><td>10 / Moss</td><td class="num">$92.00</td><td class="num cell-muted">—</td><td class="num">4</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-tab-panel="images">
+          <div class="section-hint" style="padding-top:1.5rem;">4 images, ordered by position</div>
+          <div class="gallery" style="padding:0 1.5rem 1.5rem;">
+            <div class="gallery-item"><span class="gallery-pos">1</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg><span>side.jpg</span></div>
+            <div class="gallery-item"><span class="gallery-pos">2</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg><span>sole.jpg</span></div>
+            <div class="gallery-item"><span class="gallery-pos">3</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg><span>top.jpg</span></div>
+            <div class="gallery-item"><span class="gallery-pos">4</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg><span>moss.jpg</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= COLLECTIONS — LIST (GET /collections) ================= -->
+    <section id="view-collections-list" data-view hidden>
+      <div class="view-header">
+        <div>
+          <h1>Collections</h1>
+          <p class="view-subtitle">3 collections</p>
+        </div>
+        <button class="btn btn-md btn-primary" data-action="noop">Add collection</button>
+      </div>
+
+      <div class="card">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Collection</th><th>Description</th><th>Products</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="cell-title">Summer Essentials</td>
+                <td class="cell-muted">Warm-weather favorites across apparel and accessories.</td>
+                <td class="num">12</td>
+                <td><button class="btn btn-sm btn-secondary" data-nav="collections-detail">View</button></td>
+              </tr>
+              <tr>
+                <td class="cell-title">New Arrivals</td>
+                <td class="cell-muted">The latest drops, updated weekly.</td>
+                <td class="num">8</td>
+                <td><button class="btn btn-sm btn-secondary" data-nav="collections-detail">View</button></td>
+              </tr>
+              <tr>
+                <td class="cell-title">Trail &amp; Outdoor</td>
+                <td class="cell-muted">Gear built for the trail.</td>
+                <td class="num">15</td>
+                <td><button class="btn btn-sm btn-secondary" data-nav="collections-detail">View</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span>Showing 1–3 of 3</span>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-sm btn-secondary" disabled>Previous</button>
+            <button class="btn btn-sm btn-secondary" disabled>Next</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= COLLECTIONS — DETAIL (GET /collections/{id} + /products) ================= -->
+    <section id="view-collections-detail" data-view hidden>
+      <ul class="crumb">
+        <li><a data-nav="collections-list">Collections</a></li>
+        <li aria-hidden="true">/</li>
+        <li class="current" aria-current="page">Trail &amp; Outdoor</li>
+      </ul>
+
+      <div class="view-header">
+        <div>
+          <h1>Trail &amp; Outdoor</h1>
+          <p class="view-subtitle">trail-outdoor · Gear built for the trail.</p>
+        </div>
+        <button class="btn btn-md btn-secondary" data-action="noop">Edit collection</button>
+      </div>
+
+      <div class="card">
+        <div class="section-title">Products in this collection</div>
+        <div class="section-hint">Ordered by position — drag to reorder in the real admin.</div>
+        <div class="table-scroll">
+          <table id="collection-products-table">
+            <thead><tr><th>#</th><th>Product</th><th>Vendor</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="num cell-muted">1</td>
+                <td class="cell-title">Trail Runner Sneaker</td>
+                <td>Northbound Gear</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td>
+                  <button class="btn-close btn-close-sm" aria-label="Remove from collection" data-action="remove-collection-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="num cell-muted">2</td>
+                <td class="cell-title">Merino Wool Beanie</td>
+                <td>Northbound Gear</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td>
+                  <button class="btn-close btn-close-sm" aria-label="Remove from collection" data-action="remove-collection-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td class="num cell-muted">3</td>
+                <td class="cell-title">Insulated Water Bottle</td>
+                <td>Home &amp; Table</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td>
+                  <button class="btn-close btn-close-sm" aria-label="Remove from collection" data-action="remove-collection-row">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="add-row">
+          <input type="text" placeholder="Product title or SKU to add…" id="cd-add-input">
+          <button class="btn btn-sm btn-primary" id="cd-add-btn">Add</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ---- Theme sync: mirrors ThemeProvider.tsx's mechanism (toggle a .dark class),
+  // but reads the artifact viewer's data-theme attribute / system preference instead of localStorage.
+  (function () {
+    function computeDark() {
+      var explicit = document.documentElement.getAttribute('data-theme');
+      if (explicit === 'dark') return true;
+      if (explicit === 'light') return false;
+      return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    function syncDark() {
+      document.documentElement.classList.toggle('dark', computeDark());
+    }
+    syncDark();
+    if (window.matchMedia) {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncDark);
+    }
+    new MutationObserver(syncDark).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  })();
+
+  // ---- View routing ----
+  var routes = ['products-list', 'products-new', 'products-detail', 'collections-list', 'collections-detail'];
+  function showView(route) {
+    if (routes.indexOf(route) === -1) route = 'products-list';
+    routes.forEach(function (r) {
+      var el = document.getElementById('view-' + r);
+      if (el) el.hidden = (r !== route);
+    });
+    var section = route.indexOf('collections') === 0 ? 'collections' : 'products';
+    document.querySelectorAll('.nav-link').forEach(function (link) {
+      link.classList.toggle('active', link.getAttribute('data-section') === section);
+    });
+    window.scrollTo(0, 0);
+  }
+  document.addEventListener('click', function (event) {
+    var target = event.target.closest('[data-nav]');
+    if (!target) return;
+    event.preventDefault();
+    showView(target.getAttribute('data-nav'));
+  });
+  showView('products-list');
+
+  // ---- Dropdown menus (mirrors the Dropdown component: click outside / Escape closes it) ----
+  function closeAllMenus(except) {
+    document.querySelectorAll('[data-dropdown]').forEach(function (wrap) {
+      if (wrap === except) return;
+      var panel = wrap.querySelector('.menu-panel');
+      var trigger = wrap.querySelector('[data-dropdown-trigger]');
+      if (panel) panel.hidden = true;
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    });
+  }
+  document.addEventListener('click', function (event) {
+    var trigger = event.target.closest('[data-dropdown-trigger]');
+    if (trigger) {
+      var wrap = trigger.closest('[data-dropdown]');
+      var panel = wrap.querySelector('.menu-panel');
+      var isOpen = !panel.hidden;
+      closeAllMenus();
+      panel.hidden = isOpen;
+      trigger.setAttribute('aria-expanded', String(!isOpen));
+      return;
+    }
+    if (!event.target.closest('.menu-panel')) closeAllMenus();
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') closeAllMenus();
+  });
+
+  // ---- Row actions ----
+  document.addEventListener('click', function (event) {
+    var deleteBtn = event.target.closest('[data-action="delete-row"]');
+    if (deleteBtn) {
+      var row = deleteBtn.closest('tr');
+      var name = row.querySelector('.cell-title').textContent;
+      row.remove();
+      closeAllMenus();
+      flashAlert(document.getElementById('view-products-list'), 'success', name + ' was deleted.');
+    }
+    var removeBtn = event.target.closest('[data-action="remove-collection-row"]');
+    if (removeBtn) {
+      removeBtn.closest('tr').remove();
+      flashAlert(document.getElementById('view-collections-detail'), 'success', 'Removed from collection.');
+    }
+  });
+
+  function flashAlert(container, variant, message) {
+    var el = document.createElement('div');
+    el.className = 'alert alert-' + variant;
+    el.style.marginTop = '1rem';
+    el.innerHTML = '<span></span><button class="btn-close btn-close-sm" aria-label="Dismiss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+    el.querySelector('span').textContent = message;
+    el.querySelector('.btn-close').addEventListener('click', function () { el.remove(); });
+    container.insertBefore(el, container.firstChild.nextSibling || null);
+    container.prepend(el);
+  }
+
+  // ---- Dismissible alert banner (ButtonClose) ----
+  document.addEventListener('click', function (event) {
+    var dismiss = event.target.closest('[data-dismiss-alert]');
+    if (dismiss) dismiss.closest('.alert').remove();
+  });
+
+  // ---- Filters on the Products list ----
+  document.querySelectorAll('[data-filter]').forEach(function (select) {
+    select.addEventListener('change', applyFilters);
+  });
+  function applyFilters() {
+    var status = document.querySelector('[data-filter="status"]').value;
+    var vendor = document.querySelector('[data-filter="vendor"]').value;
+    document.querySelectorAll('#products-table tbody tr').forEach(function (row) {
+      var matchesStatus = !status || row.getAttribute('data-status') === status;
+      var matchesVendor = !vendor || row.getAttribute('data-vendor') === vendor;
+      row.hidden = !(matchesStatus && matchesVendor);
+    });
+  }
+
+  // ---- Tabs on Product detail ----
+  document.querySelectorAll('.tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var name = tab.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t === tab); });
+      document.querySelectorAll('[data-tab-panel]').forEach(function (panel) {
+        panel.classList.toggle('active', panel.getAttribute('data-tab-panel') === name);
+      });
+    });
+  });
+
+  // ---- Add product to collection (demo only) ----
+  document.getElementById('cd-add-btn').addEventListener('click', function () {
+    var input = document.getElementById('cd-add-input');
+    var value = input.value.trim();
+    if (!value) return;
+    var tbody = document.querySelector('#collection-products-table tbody');
+    var row = document.createElement('tr');
+    var position = tbody.children.length + 1;
+    row.innerHTML = '<td class="num cell-muted">' + position + '</td><td class="cell-title"></td><td>—</td><td><span class="badge badge-warning">Draft</span></td>' +
+      '<td><button class="btn-close btn-close-sm" aria-label="Remove from collection" data-action="remove-collection-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>';
+    row.querySelector('.cell-title').textContent = value;
+    tbody.appendChild(row);
+    input.value = '';
+  });
+</script>
