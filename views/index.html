@@ -79,7 +79,7 @@
   .nav-link svg { flex: none; width: 16px; height: 16px; }
 
   /* ---- Main content ---- */
-  .content { flex: 1; min-width: 0; padding: 1.75rem 2rem 3rem; max-width: 960px; }
+  .content { flex: 1; min-width: 0; padding: 1.75rem 2rem 3rem; max-width: 1040px; }
   .view-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
   .view-header h1 { font-size: 1.375rem; font-weight: 700; }
   .view-subtitle { color: var(--ink-muted); font-size: 0.8125rem; margin-top: 0.25rem; }
@@ -140,9 +140,17 @@
   .alert-danger { background: var(--red-50); color: var(--red-800); border-color: var(--red-200); }
   .dark .alert-danger { background: var(--red-950); color: var(--red-200); border-color: var(--red-800); }
 
-  /* ---- Dropdown (Dropdown component) ---- */
+  /* ---- Dropdown (Dropdown component) ----
+     .menu-panel is `position: fixed` with its top/left computed in JS (positionMenu()),
+     so it always escapes any scrolling/overflow ancestor (fixes the table-growing-a-
+     scrollbar bug) and never inherits the browser's default <ul> bullet/indent. */
   .menu-wrap { position: relative; display: inline-block; }
-  .menu-panel { position: absolute; right: 0; z-index: 10; margin-top: 0.5rem; min-width: 10rem; border-radius: 0.75rem; border: 1px solid var(--border); background: var(--surface-raised); padding: 0.25rem 0; box-shadow: 0 10px 15px -3px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.06); }
+  .menu-panel {
+    position: fixed; z-index: 50; list-style: none; margin: 0;
+    min-width: 10rem; border-radius: 0.75rem; border: 1px solid var(--border);
+    background: var(--surface-raised); padding: 0.25rem 0;
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,.12), 0 4px 6px -2px rgba(0,0,0,.06);
+  }
   .menu-item { display: block; width: 100%; text-align: left; padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--gray-700); background: transparent; border: 0; cursor: pointer; }
   .menu-item:hover { background: var(--gray-100); }
   .dark .menu-item { color: var(--gray-200); }
@@ -168,12 +176,13 @@
   .dark .row-thumb { background: linear-gradient(135deg, var(--gray-800), var(--gray-700)); color: var(--gray-500); }
   .row-thumb svg { width: 16px; height: 16px; }
   .title-cell { display: flex; align-items: center; gap: 0.75rem; }
+  .row-actions { display: flex; align-items: center; gap: 0.375rem; }
 
   /* ---- New: filter bar / form inputs (not in projects-story-book yet) ---- */
   .filter-bar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 1rem; }
   .field { display: flex; flex-direction: column; gap: 0.375rem; }
   .field label { font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); }
-  select, input[type="text"], input[type="date"], textarea {
+  select, input[type="text"], input[type="date"], input[type="number"], textarea {
     font: inherit; font-size: 0.875rem; padding: 0.5rem 0.75rem; border-radius: 0.5rem;
     border: 1px solid var(--border); background: var(--surface); color: var(--ink);
   }
@@ -185,8 +194,23 @@
   .form-grid .span-2 { grid-column: 1 / -1; }
   @media (max-width: 620px) { .form-grid { grid-template-columns: 1fr; } }
 
+  /* Compact inputs used for inline table-row editing (Options/Variants) */
+  .cell-input-sm { width: 100%; min-width: 0; padding: 0.375rem 0.5rem; font-size: 0.8125rem; }
+
   /* ---- New: pagination (not in projects-story-book yet) ---- */
-  .pagination { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.5rem; color: var(--ink-muted); font-size: 0.8125rem; }
+  .pagination { display: flex; flex-wrap: wrap; row-gap: 0.75rem; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.5rem; color: var(--ink-muted); font-size: 0.8125rem; }
+  .pagination-size, .pagination-jump { display: flex; align-items: center; gap: 0.5rem; }
+  .pagination-size select { padding: 0.375rem 0.5rem; font-size: 0.8125rem; }
+  .pagination-jump input { width: 3.5rem; padding: 0.375rem 0.5rem; font-size: 0.8125rem; text-align: center; }
+  .pagination-controls { display: flex; align-items: center; gap: 0.25rem; }
+  .pagination-pages { display: flex; gap: 0.25rem; }
+  .page-btn { min-width: 2rem; height: 2rem; padding: 0 0.375rem; border-radius: 0.5rem; border: 0; background: transparent; color: var(--ink); font-size: 0.8125rem; font-family: inherit; cursor: pointer; }
+  .page-btn:hover { background: var(--gray-100); }
+  .dark .page-btn:hover { background: var(--gray-800); }
+  .page-btn.active { background: var(--blue-50); color: var(--blue-800); font-weight: 700; }
+  .dark .page-btn.active { background: var(--blue-950); color: var(--blue-200); }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .page-ellipsis { display: flex; align-items: center; justify-content: center; min-width: 2rem; color: var(--ink-muted); }
 
   /* ---- New: tabs (not in projects-story-book yet) ---- */
   .tabs { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--border); padding: 0 1.5rem; }
@@ -196,12 +220,26 @@
   .dark .tab.active { color: var(--blue-400); border-color: var(--blue-400); }
   .tab-panel { display: none; padding: 1.5rem; }
   .tab-panel.active { display: block; }
+  .tab-toolbar { display: flex; justify-content: flex-end; padding: 1rem 1.5rem 0; }
 
   /* ---- New: image gallery (not in projects-story-book yet) ---- */
-  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.75rem; }
-  .gallery-item { aspect-ratio: 1; border-radius: 0.75rem; border: 1px solid var(--border); background: linear-gradient(135deg, var(--gray-100), var(--gray-200)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.375rem; color: var(--gray-400); font-size: 0.6875rem; position: relative; }
+  .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 1rem; }
+  .gallery-figure { display: flex; flex-direction: column; gap: 0.375rem; }
+  .gallery-figure input { font-size: 0.75rem; padding: 0.3rem 0.5rem; }
+  .gallery-item {
+    aspect-ratio: 1; border-radius: 0.75rem; border: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.375rem;
+    color: var(--gray-400); font-size: 0.6875rem; position: relative; overflow: hidden; padding: 0;
+  }
   .dark .gallery-item { background: linear-gradient(135deg, var(--gray-800), var(--gray-700)); color: var(--gray-500); }
-  .gallery-pos { position: absolute; top: 0.375rem; left: 0.375rem; background: rgba(0,0,0,.55); color: #fff; font-size: 0.625rem; font-weight: 700; padding: 0.0625rem 0.375rem; border-radius: 9999px; }
+  .gallery-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .gallery-pos { position: absolute; top: 0.375rem; left: 0.375rem; background: rgba(0,0,0,.55); color: #fff; font-size: 0.625rem; font-weight: 700; padding: 0.0625rem 0.375rem; border-radius: 9999px; z-index: 1; }
+  .gallery-remove { position: absolute; top: 0.375rem; right: 0.375rem; z-index: 1; background: rgba(17,24,39,.6); color: #fff; }
+  .gallery-remove:hover { background: rgba(17,24,39,.85); color: #fff; }
+  .gallery-item.add-tile { cursor: pointer; border-style: dashed; background: transparent; font: inherit; }
+  .gallery-item.add-tile:hover { border-color: var(--blue-400); color: var(--blue-600); }
+  .dark .gallery-item.add-tile:hover { color: var(--blue-400); }
 
   .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem 1.5rem; }
   .info-grid dt { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-muted); font-weight: 700; margin-bottom: 0.25rem; }
@@ -247,7 +285,7 @@
       <div class="view-header">
         <div>
           <h1>Products</h1>
-          <p class="view-subtitle">6 products across 3 vendors</p>
+          <p class="view-subtitle" id="products-count">Loading…</p>
         </div>
         <button class="btn btn-md btn-primary" data-nav="products-new">Add product</button>
       </div>
@@ -269,6 +307,7 @@
             <option value="Apparel Co.">Apparel Co.</option>
             <option value="Northbound Gear">Northbound Gear</option>
             <option value="Home &amp; Table">Home &amp; Table</option>
+            <option value="Coastal Supply Co.">Coastal Supply Co.</option>
           </select>
         </div>
       </div>
@@ -286,159 +325,29 @@
                 <th></th>
               </tr>
             </thead>
-            <tbody>
-              <tr data-status="active" data-vendor="Apparel Co.">
-                <td>
-                  <div class="title-cell">
-                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
-                    <div><div class="cell-title">Classic Cotton Tee</div><div class="cell-muted">classic-cotton-tee</div></div>
-                  </div>
-                </td>
-                <td>Apparel Co.</td>
-                <td><span class="badge badge-success">Active</span></td>
-                <td class="num">$18.00 – $24.00</td>
-                <td class="num">3</td>
-                <td>
-                  <div class="menu-wrap" data-dropdown>
-                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-                    </button>
-                    <ul class="menu-panel" role="menu" hidden>
-                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
-                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
-                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-              <tr data-status="active" data-vendor="Northbound Gear">
-                <td>
-                  <div class="title-cell">
-                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
-                    <div><div class="cell-title">Trail Runner Sneaker</div><div class="cell-muted">trail-runner-sneaker</div></div>
-                  </div>
-                </td>
-                <td>Northbound Gear</td>
-                <td><span class="badge badge-success">Active</span></td>
-                <td class="num">$89.00 – $110.00</td>
-                <td class="num">4</td>
-                <td>
-                  <div class="menu-wrap" data-dropdown>
-                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-                    </button>
-                    <ul class="menu-panel" role="menu" hidden>
-                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
-                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
-                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-              <tr data-status="draft" data-vendor="Home &amp; Table">
-                <td>
-                  <div class="title-cell">
-                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
-                    <div><div class="cell-title">Ceramic Pour-Over Mug</div><div class="cell-muted">ceramic-pour-over-mug</div></div>
-                  </div>
-                </td>
-                <td>Home &amp; Table</td>
-                <td><span class="badge badge-warning">Draft</span></td>
-                <td class="num">$22.00</td>
-                <td class="num">1</td>
-                <td>
-                  <div class="menu-wrap" data-dropdown>
-                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-                    </button>
-                    <ul class="menu-panel" role="menu" hidden>
-                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
-                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
-                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-              <tr data-status="active" data-vendor="Northbound Gear">
-                <td>
-                  <div class="title-cell">
-                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
-                    <div><div class="cell-title">Merino Wool Beanie</div><div class="cell-muted">merino-wool-beanie</div></div>
-                  </div>
-                </td>
-                <td>Northbound Gear</td>
-                <td><span class="badge badge-success">Active</span></td>
-                <td class="num">$28.00</td>
-                <td class="num">2</td>
-                <td>
-                  <div class="menu-wrap" data-dropdown>
-                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-                    </button>
-                    <ul class="menu-panel" role="menu" hidden>
-                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
-                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
-                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-              <tr data-status="archived" data-vendor="Apparel Co.">
-                <td>
-                  <div class="title-cell">
-                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
-                    <div><div class="cell-title">Canvas Tote Bag</div><div class="cell-muted">canvas-tote-bag</div></div>
-                  </div>
-                </td>
-                <td>Apparel Co.</td>
-                <td><span class="badge badge-secondary">Archived</span></td>
-                <td class="num">$16.00</td>
-                <td class="num">1</td>
-                <td>
-                  <div class="menu-wrap" data-dropdown>
-                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-                    </button>
-                    <ul class="menu-panel" role="menu" hidden>
-                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
-                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
-                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-              <tr data-status="active" data-vendor="Home &amp; Table">
-                <td>
-                  <div class="title-cell">
-                    <div class="row-thumb"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg></div>
-                    <div><div class="cell-title">Insulated Water Bottle</div><div class="cell-muted">insulated-water-bottle</div></div>
-                  </div>
-                </td>
-                <td>Home &amp; Table</td>
-                <td><span class="badge badge-success">Active</span></td>
-                <td class="num">$32.00 – $38.00</td>
-                <td class="num">2</td>
-                <td>
-                  <div class="menu-wrap" data-dropdown>
-                    <button class="icon-btn" data-dropdown-trigger aria-haspopup="menu" aria-expanded="false" aria-label="Row actions">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>
-                    </button>
-                    <ul class="menu-panel" role="menu" hidden>
-                      <li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>
-                      <li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>
-                      <li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>
-                    </ul>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
+            <tbody id="products-tbody"></tbody>
           </table>
         </div>
-        <div class="pagination">
-          <span>Showing 1–6 of 6</span>
-          <div style="display:flex; gap:0.5rem;">
-            <button class="btn btn-sm btn-secondary" disabled>Previous</button>
-            <button class="btn btn-sm btn-secondary" disabled>Next</button>
+        <div class="pagination" id="products-pagination">
+          <div class="pagination-size">
+            <label for="products-page-size">Rows per page</label>
+            <select id="products-page-size" data-page-size>
+              <option value="10">10</option>
+              <option value="25" selected>25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="pagination-info" data-page-info>Showing…</div>
+          <div class="pagination-controls">
+            <button class="page-btn" data-page-first aria-label="First page">«</button>
+            <button class="page-btn" data-page-prev aria-label="Previous page">‹</button>
+            <div class="pagination-pages" data-page-numbers></div>
+            <button class="page-btn" data-page-next aria-label="Next page">›</button>
+            <button class="page-btn" data-page-last aria-label="Last page">»</button>
+          </div>
+          <div class="pagination-jump">
+            <label for="products-jump">Go to page</label>
+            <input type="text" inputmode="numeric" id="products-jump" data-page-jump>
           </div>
         </div>
       </div>
@@ -549,39 +458,33 @@
         </div>
 
         <div class="tab-panel" data-tab-panel="options">
+          <div class="tab-toolbar">
+            <button class="btn btn-sm btn-secondary" id="add-option-btn">+ Add option</button>
+          </div>
           <div class="table-scroll">
             <table>
-              <thead><tr><th>Name</th><th>Position</th></tr></thead>
-              <tbody>
-                <tr><td class="cell-title">Size</td><td class="num">1</td></tr>
-                <tr><td class="cell-title">Color</td><td class="num">2</td></tr>
-              </tbody>
+              <thead><tr><th>Name</th><th>Position</th><th></th></tr></thead>
+              <tbody id="options-tbody"></tbody>
             </table>
           </div>
         </div>
 
         <div class="tab-panel" data-tab-panel="variants">
+          <div class="tab-toolbar">
+            <button class="btn btn-sm btn-secondary" id="add-variant-btn">+ Add variant</button>
+          </div>
           <div class="table-scroll">
             <table>
-              <thead><tr><th>SKU</th><th>Title</th><th>Price</th><th>Compare-at</th><th>Position</th></tr></thead>
-              <tbody>
-                <tr><td class="cell-muted">NR-TRS-9-SLATE</td><td>9 / Slate</td><td class="num">$89.00</td><td class="num cell-muted">$110.00</td><td class="num">1</td></tr>
-                <tr><td class="cell-muted">NR-TRS-10-SLATE</td><td>10 / Slate</td><td class="num">$89.00</td><td class="num cell-muted">$110.00</td><td class="num">2</td></tr>
-                <tr><td class="cell-muted">NR-TRS-9-MOSS</td><td>9 / Moss</td><td class="num">$92.00</td><td class="num cell-muted">—</td><td class="num">3</td></tr>
-                <tr><td class="cell-muted">NR-TRS-10-MOSS</td><td>10 / Moss</td><td class="num">$92.00</td><td class="num cell-muted">—</td><td class="num">4</td></tr>
-              </tbody>
+              <thead><tr><th>SKU</th><th>Title</th><th>Price</th><th>Compare-at</th><th>Position</th><th></th></tr></thead>
+              <tbody id="variants-tbody"></tbody>
             </table>
           </div>
         </div>
 
         <div class="tab-panel" data-tab-panel="images">
-          <div class="section-hint" style="padding-top:1.5rem;">4 images, ordered by position</div>
-          <div class="gallery" style="padding:0 1.5rem 1.5rem;">
-            <div class="gallery-item"><span class="gallery-pos">1</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg><span>side.jpg</span></div>
-            <div class="gallery-item"><span class="gallery-pos">2</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg><span>sole.jpg</span></div>
-            <div class="gallery-item"><span class="gallery-pos">3</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg><span>top.jpg</span></div>
-            <div class="gallery-item"><span class="gallery-pos">4</span><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg><span>moss.jpg</span></div>
-          </div>
+          <div class="section-hint" style="padding-top:1.5rem;">Images, ordered by position — click "Add image" to upload one.</div>
+          <input type="file" accept="image/*" id="image-file-input" hidden>
+          <div class="gallery" id="images-gallery" style="padding:0 1.5rem 1.5rem;"></div>
         </div>
       </div>
     </section>
@@ -600,33 +503,29 @@
         <div class="table-scroll">
           <table>
             <thead><tr><th>Collection</th><th>Description</th><th>Products</th><th></th></tr></thead>
-            <tbody>
-              <tr>
-                <td class="cell-title">Summer Essentials</td>
-                <td class="cell-muted">Warm-weather favorites across apparel and accessories.</td>
-                <td class="num">12</td>
-                <td><button class="btn btn-sm btn-secondary" data-nav="collections-detail">View</button></td>
-              </tr>
-              <tr>
-                <td class="cell-title">New Arrivals</td>
-                <td class="cell-muted">The latest drops, updated weekly.</td>
-                <td class="num">8</td>
-                <td><button class="btn btn-sm btn-secondary" data-nav="collections-detail">View</button></td>
-              </tr>
-              <tr>
-                <td class="cell-title">Trail &amp; Outdoor</td>
-                <td class="cell-muted">Gear built for the trail.</td>
-                <td class="num">15</td>
-                <td><button class="btn btn-sm btn-secondary" data-nav="collections-detail">View</button></td>
-              </tr>
-            </tbody>
+            <tbody id="collections-tbody"></tbody>
           </table>
         </div>
-        <div class="pagination">
-          <span>Showing 1–3 of 3</span>
-          <div style="display:flex; gap:0.5rem;">
-            <button class="btn btn-sm btn-secondary" disabled>Previous</button>
-            <button class="btn btn-sm btn-secondary" disabled>Next</button>
+        <div class="pagination" id="collections-pagination">
+          <div class="pagination-size">
+            <label for="collections-page-size">Rows per page</label>
+            <select id="collections-page-size" data-page-size>
+              <option value="10" selected>10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+          <div class="pagination-info" data-page-info>Showing…</div>
+          <div class="pagination-controls">
+            <button class="page-btn" data-page-first aria-label="First page">«</button>
+            <button class="page-btn" data-page-prev aria-label="Previous page">‹</button>
+            <div class="pagination-pages" data-page-numbers></div>
+            <button class="page-btn" data-page-next aria-label="Next page">›</button>
+            <button class="page-btn" data-page-last aria-label="Last page">»</button>
+          </div>
+          <div class="pagination-jump">
+            <label for="collections-jump">Go to page</label>
+            <input type="text" inputmode="numeric" id="collections-jump" data-page-jump>
           </div>
         </div>
       </div>
@@ -702,6 +601,15 @@
 </div>
 
 <script>
+  // ================= Icons (inline SVG strings, reused across generated rows) =================
+  var ICON_DOTS = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>';
+  var ICON_BOX = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7l4-3h8l4 3-2 3v11H6V10z"/></svg>';
+  var ICON_PENCIL = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  var ICON_TRASH = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+  var ICON_PLUS = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
+  var ICON_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  var ICON_IMAGE_PLACEHOLDER = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-4 4-3-3-6 6"/></svg>';
+
   // ---- Theme sync: mirrors ThemeProvider.tsx's mechanism (toggle a .dark class),
   // but reads the artifact viewer's data-theme attribute / system preference instead of localStorage.
   (function () {
@@ -721,7 +629,7 @@
     new MutationObserver(syncDark).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   })();
 
-  // ---- View routing ----
+  // ================= View routing =================
   var routes = ['products-list', 'products-new', 'products-detail', 'collections-list', 'collections-detail'];
   function showView(route) {
     if (routes.indexOf(route) === -1) route = 'products-list';
@@ -743,25 +651,44 @@
   });
   showView('products-list');
 
-  // ---- Dropdown menus (mirrors the Dropdown component: click outside / Escape closes it) ----
-  function closeAllMenus(except) {
+  // ================= Dropdown menus (Dropdown component) =================
+  // Fix: panels are `position: fixed`, positioned in JS from the trigger's own
+  // bounding box, so they can never be clipped by (or force a scrollbar onto) an
+  // ancestor like .table-scroll, and always stay fully inside the viewport.
+  function closeAllMenus() {
     document.querySelectorAll('[data-dropdown]').forEach(function (wrap) {
-      if (wrap === except) return;
       var panel = wrap.querySelector('.menu-panel');
       var trigger = wrap.querySelector('[data-dropdown-trigger]');
       if (panel) panel.hidden = true;
       if (trigger) trigger.setAttribute('aria-expanded', 'false');
     });
   }
+  function positionMenu(trigger, panel) {
+    var triggerRect = trigger.getBoundingClientRect();
+    panel.style.left = '0px';
+    panel.style.top = '0px';
+    var panelRect = panel.getBoundingClientRect();
+    var left = triggerRect.right - panelRect.width;
+    left = Math.max(8, Math.min(left, window.innerWidth - panelRect.width - 8));
+    var top = triggerRect.bottom + 8;
+    if (top + panelRect.height > window.innerHeight - 8) {
+      top = triggerRect.top - panelRect.height - 8;
+    }
+    panel.style.left = left + 'px';
+    panel.style.top = Math.max(8, top) + 'px';
+  }
   document.addEventListener('click', function (event) {
     var trigger = event.target.closest('[data-dropdown-trigger]');
     if (trigger) {
       var wrap = trigger.closest('[data-dropdown]');
       var panel = wrap.querySelector('.menu-panel');
-      var isOpen = !panel.hidden;
+      var wasOpen = !panel.hidden;
       closeAllMenus();
-      panel.hidden = isOpen;
-      trigger.setAttribute('aria-expanded', String(!isOpen));
+      if (!wasOpen) {
+        panel.hidden = false;
+        positionMenu(trigger, panel);
+        trigger.setAttribute('aria-expanded', 'true');
+      }
       return;
     }
     if (!event.target.closest('.menu-panel')) closeAllMenus();
@@ -769,15 +696,261 @@
   document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') closeAllMenus();
   });
+  window.addEventListener('scroll', function () { closeAllMenus(); }, true);
+  window.addEventListener('resize', function () { closeAllMenus(); });
 
-  // ---- Row actions ----
+  function buildRowMenu() {
+    var wrap = document.createElement('div');
+    wrap.className = 'menu-wrap';
+    wrap.setAttribute('data-dropdown', '');
+    var trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'icon-btn';
+    trigger.setAttribute('data-dropdown-trigger', '');
+    trigger.setAttribute('aria-haspopup', 'menu');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-label', 'Row actions');
+    trigger.innerHTML = ICON_DOTS;
+    var panel = document.createElement('ul');
+    panel.className = 'menu-panel';
+    panel.setAttribute('role', 'menu');
+    panel.hidden = true;
+    panel.innerHTML =
+      '<li role="none"><button class="menu-item" role="menuitem" data-nav="products-detail">Edit</button></li>' +
+      '<li role="none"><button class="menu-item" role="menuitem" data-action="duplicate">Duplicate</button></li>' +
+      '<li role="none"><button class="menu-item danger" role="menuitem" data-action="delete-row">Delete</button></li>';
+    wrap.appendChild(trigger);
+    wrap.appendChild(panel);
+    return wrap;
+  }
+
+  // ================= Toast helper (Alert + ButtonClose) =================
+  function flashAlert(container, variant, message) {
+    var el = document.createElement('div');
+    el.className = 'alert alert-' + variant;
+    el.style.marginTop = '1rem';
+    var span = document.createElement('span');
+    span.textContent = message;
+    var close = document.createElement('button');
+    close.className = 'btn-close btn-close-sm';
+    close.setAttribute('aria-label', 'Dismiss');
+    close.innerHTML = ICON_X;
+    close.addEventListener('click', function () { el.remove(); });
+    el.appendChild(span);
+    el.appendChild(close);
+    container.prepend(el);
+  }
+  document.addEventListener('click', function (event) {
+    var dismiss = event.target.closest('[data-dismiss-alert]');
+    if (dismiss) dismiss.closest('.alert').remove();
+  });
+
+  // ================= Generic pagination (rows-per-page, page numbers, jump-to-page) =================
+  function buildPageList(current, total) {
+    var pages = [];
+    for (var i = 1; i <= total; i++) {
+      if (i === 1 || i === total || (i >= current - 1 && i <= current + 1)) {
+        pages.push(i);
+      } else if (pages[pages.length - 1] !== '…') {
+        pages.push('…');
+      }
+    }
+    return pages;
+  }
+  function setupPagination(root, getTotal, onChange) {
+    var state = { page: 1, pageSize: parseInt(root.querySelector('[data-page-size]').value, 10) };
+
+    function pageCount() { return Math.max(1, Math.ceil(getTotal() / state.pageSize)); }
+
+    function render() {
+      var total = getTotal();
+      var pages = pageCount();
+      if (state.page > pages) state.page = pages;
+      if (state.page < 1) state.page = 1;
+      var start = total === 0 ? 0 : (state.page - 1) * state.pageSize + 1;
+      var end = Math.min(total, state.page * state.pageSize);
+      root.querySelector('[data-page-info]').textContent = total === 0 ? 'No results' : ('Showing ' + start + '–' + end + ' of ' + total);
+      root.querySelector('[data-page-first]').disabled = state.page === 1;
+      root.querySelector('[data-page-prev]').disabled = state.page === 1;
+      root.querySelector('[data-page-next]').disabled = state.page === pages;
+      root.querySelector('[data-page-last]').disabled = state.page === pages;
+      var jump = root.querySelector('[data-page-jump]');
+      jump.value = state.page;
+      jump.disabled = pages <= 1;
+      var numbers = root.querySelector('[data-page-numbers]');
+      numbers.innerHTML = '';
+      buildPageList(state.page, pages).forEach(function (p) {
+        if (p === '…') {
+          var span = document.createElement('span');
+          span.className = 'page-ellipsis';
+          span.textContent = '…';
+          numbers.appendChild(span);
+        } else {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'page-btn' + (p === state.page ? ' active' : '');
+          btn.textContent = String(p);
+          btn.addEventListener('click', function () { goTo(p); });
+          numbers.appendChild(btn);
+        }
+      });
+    }
+
+    function goTo(page) {
+      state.page = Math.min(Math.max(1, page), pageCount());
+      render();
+      onChange(state.page, state.pageSize);
+    }
+
+    root.querySelector('[data-page-size]').addEventListener('change', function (event) {
+      state.pageSize = parseInt(event.target.value, 10);
+      state.page = 1;
+      render();
+      onChange(state.page, state.pageSize);
+    });
+    root.querySelector('[data-page-first]').addEventListener('click', function () { goTo(1); });
+    root.querySelector('[data-page-prev]').addEventListener('click', function () { goTo(state.page - 1); });
+    root.querySelector('[data-page-next]').addEventListener('click', function () { goTo(state.page + 1); });
+    root.querySelector('[data-page-last]').addEventListener('click', function () { goTo(pageCount()); });
+    root.querySelector('[data-page-jump]').addEventListener('change', function (event) {
+      var value = parseInt(event.target.value, 10);
+      if (!isNaN(value)) goTo(value);
+    });
+
+    return { state: state, render: render };
+  }
+
+  // ================= Products list (GET /products) =================
+  var STATUS_BADGE = { active: 'success', draft: 'warning', archived: 'secondary' };
+  var STATUS_LABEL = { active: 'Active', draft: 'Draft', archived: 'Archived' };
+  var PRODUCTS = [
+    { title: 'Classic Cotton Tee', slug: 'classic-cotton-tee', vendor: 'Apparel Co.', status: 'active', priceLabel: '$18.00 – $24.00', variantCount: 3 },
+    { title: 'Trail Runner Sneaker', slug: 'trail-runner-sneaker', vendor: 'Northbound Gear', status: 'active', priceLabel: '$89.00 – $110.00', variantCount: 4 },
+    { title: 'Ceramic Pour-Over Mug', slug: 'ceramic-pour-over-mug', vendor: 'Home & Table', status: 'draft', priceLabel: '$22.00', variantCount: 1 },
+    { title: 'Merino Wool Beanie', slug: 'merino-wool-beanie', vendor: 'Northbound Gear', status: 'active', priceLabel: '$28.00', variantCount: 2 },
+    { title: 'Canvas Tote Bag', slug: 'canvas-tote-bag', vendor: 'Apparel Co.', status: 'archived', priceLabel: '$16.00', variantCount: 1 },
+    { title: 'Insulated Water Bottle', slug: 'insulated-water-bottle', vendor: 'Home & Table', status: 'active', priceLabel: '$32.00 – $38.00', variantCount: 2 },
+    { title: 'Linen Button-Up Shirt', slug: 'linen-button-up-shirt', vendor: 'Apparel Co.', status: 'active', priceLabel: '$46.00 – $52.00', variantCount: 4 },
+    { title: 'Fleece-Lined Hoodie', slug: 'fleece-lined-hoodie', vendor: 'Apparel Co.', status: 'active', priceLabel: '$58.00', variantCount: 3 },
+    { title: 'Packable Rain Jacket', slug: 'packable-rain-jacket', vendor: 'Northbound Gear', status: 'active', priceLabel: '$120.00 – $140.00', variantCount: 5 },
+    { title: 'Daypack 22L', slug: 'daypack-22l', vendor: 'Northbound Gear', status: 'draft', priceLabel: '$75.00', variantCount: 2 },
+    { title: 'Hiking Socks (2-Pack)', slug: 'hiking-socks-2-pack', vendor: 'Northbound Gear', status: 'active', priceLabel: '$14.00', variantCount: 3 },
+    { title: 'Enamel Camp Mug', slug: 'enamel-camp-mug', vendor: 'Home & Table', status: 'active', priceLabel: '$12.00', variantCount: 1 },
+    { title: 'Linen Napkin Set', slug: 'linen-napkin-set', vendor: 'Home & Table', status: 'active', priceLabel: '$24.00', variantCount: 1 },
+    { title: 'Cast Iron Skillet', slug: 'cast-iron-skillet', vendor: 'Home & Table', status: 'archived', priceLabel: '$45.00', variantCount: 1 },
+    { title: 'Cork Yoga Mat', slug: 'cork-yoga-mat', vendor: 'Coastal Supply Co.', status: 'active', priceLabel: '$58.00', variantCount: 1 },
+    { title: 'Recycled Beach Towel', slug: 'recycled-beach-towel', vendor: 'Coastal Supply Co.', status: 'active', priceLabel: '$34.00 – $38.00', variantCount: 3 },
+    { title: 'Polarized Sunglasses', slug: 'polarized-sunglasses', vendor: 'Coastal Supply Co.', status: 'draft', priceLabel: '$65.00', variantCount: 2 },
+    { title: 'Salt-Washed Cap', slug: 'salt-washed-cap', vendor: 'Coastal Supply Co.', status: 'active', priceLabel: '$26.00', variantCount: 2 },
+    { title: 'Organic Cotton Socks', slug: 'organic-cotton-socks', vendor: 'Apparel Co.', status: 'active', priceLabel: '$10.00', variantCount: 3 },
+    { title: 'Quilted Vest', slug: 'quilted-vest', vendor: 'Apparel Co.', status: 'active', priceLabel: '$72.00 – $80.00', variantCount: 3 },
+    { title: 'Trekking Poles (Pair)', slug: 'trekking-poles-pair', vendor: 'Northbound Gear', status: 'active', priceLabel: '$54.00', variantCount: 1 },
+    { title: 'Bamboo Cutting Board', slug: 'bamboo-cutting-board', vendor: 'Home & Table', status: 'active', priceLabel: '$30.00', variantCount: 1 }
+  ];
+
+  function uniqueVendors(list) {
+    var seen = {};
+    list.forEach(function (p) { seen[p.vendor] = true; });
+    return Object.keys(seen);
+  }
+  document.getElementById('products-count').textContent =
+    PRODUCTS.length + ' products across ' + uniqueVendors(PRODUCTS).length + ' vendors';
+
+  function filteredProducts() {
+    var status = document.querySelector('[data-filter="status"]').value;
+    var vendor = document.querySelector('[data-filter="vendor"]').value;
+    return PRODUCTS.filter(function (p) {
+      return (!status || p.status === status) && (!vendor || p.vendor === vendor);
+    });
+  }
+
+  function renderProductRow(p) {
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-status', p.status);
+    tr.setAttribute('data-vendor', p.vendor);
+
+    var titleTd = document.createElement('td');
+    var titleCell = document.createElement('div');
+    titleCell.className = 'title-cell';
+    var thumb = document.createElement('div');
+    thumb.className = 'row-thumb';
+    thumb.innerHTML = ICON_BOX;
+    var titleText = document.createElement('div');
+    var titleMain = document.createElement('div');
+    titleMain.className = 'cell-title';
+    titleMain.textContent = p.title;
+    var titleSlug = document.createElement('div');
+    titleSlug.className = 'cell-muted';
+    titleSlug.textContent = p.slug;
+    titleText.appendChild(titleMain);
+    titleText.appendChild(titleSlug);
+    titleCell.appendChild(thumb);
+    titleCell.appendChild(titleText);
+    titleTd.appendChild(titleCell);
+
+    var vendorTd = document.createElement('td');
+    vendorTd.textContent = p.vendor;
+
+    var statusTd = document.createElement('td');
+    var badge = document.createElement('span');
+    badge.className = 'badge badge-' + STATUS_BADGE[p.status];
+    badge.textContent = STATUS_LABEL[p.status];
+    statusTd.appendChild(badge);
+
+    var priceTd = document.createElement('td');
+    priceTd.className = 'num';
+    priceTd.textContent = p.priceLabel;
+
+    var variantsTd = document.createElement('td');
+    variantsTd.className = 'num';
+    variantsTd.textContent = String(p.variantCount);
+
+    var actionsTd = document.createElement('td');
+    actionsTd.appendChild(buildRowMenu());
+
+    tr.appendChild(titleTd);
+    tr.appendChild(vendorTd);
+    tr.appendChild(statusTd);
+    tr.appendChild(priceTd);
+    tr.appendChild(variantsTd);
+    tr.appendChild(actionsTd);
+    return tr;
+  }
+
+  var productsPager = setupPagination(
+    document.getElementById('products-pagination'),
+    function () { return filteredProducts().length; },
+    function () { renderProductsTable(); }
+  );
+
+  function renderProductsTable() {
+    var list = filteredProducts();
+    var start = (productsPager.state.page - 1) * productsPager.state.pageSize;
+    var pageItems = list.slice(start, start + productsPager.state.pageSize);
+    var tbody = document.getElementById('products-tbody');
+    tbody.innerHTML = '';
+    pageItems.forEach(function (p) { tbody.appendChild(renderProductRow(p)); });
+    productsPager.render();
+  }
+  renderProductsTable();
+
+  document.querySelectorAll('[data-filter]').forEach(function (select) {
+    select.addEventListener('change', function () {
+      productsPager.state.page = 1;
+      renderProductsTable();
+    });
+  });
+
+  // ---- Row actions (delete on Products list / Collections detail) ----
   document.addEventListener('click', function (event) {
     var deleteBtn = event.target.closest('[data-action="delete-row"]');
     if (deleteBtn) {
       var row = deleteBtn.closest('tr');
       var name = row.querySelector('.cell-title').textContent;
-      row.remove();
+      var product = PRODUCTS.find(function (p) { return p.title === name; });
+      if (product) PRODUCTS.splice(PRODUCTS.indexOf(product), 1);
       closeAllMenus();
+      renderProductsTable();
       flashAlert(document.getElementById('view-products-list'), 'success', name + ' was deleted.');
     }
     var removeBtn = event.target.closest('[data-action="remove-collection-row"]');
@@ -787,47 +960,40 @@
     }
   });
 
-  function flashAlert(container, variant, message) {
-    var el = document.createElement('div');
-    el.className = 'alert alert-' + variant;
-    el.style.marginTop = '1rem';
-    el.innerHTML = '<span></span><button class="btn-close btn-close-sm" aria-label="Dismiss"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
-    el.querySelector('span').textContent = message;
-    el.querySelector('.btn-close').addEventListener('click', function () { el.remove(); });
-    container.insertBefore(el, container.firstChild.nextSibling || null);
-    container.prepend(el);
-  }
-
-  // ---- Dismissible alert banner (ButtonClose) ----
-  document.addEventListener('click', function (event) {
-    var dismiss = event.target.closest('[data-dismiss-alert]');
-    if (dismiss) dismiss.closest('.alert').remove();
-  });
-
-  // ---- Filters on the Products list ----
-  document.querySelectorAll('[data-filter]').forEach(function (select) {
-    select.addEventListener('change', applyFilters);
-  });
-  function applyFilters() {
-    var status = document.querySelector('[data-filter="status"]').value;
-    var vendor = document.querySelector('[data-filter="vendor"]').value;
-    document.querySelectorAll('#products-table tbody tr').forEach(function (row) {
-      var matchesStatus = !status || row.getAttribute('data-status') === status;
-      var matchesVendor = !vendor || row.getAttribute('data-vendor') === vendor;
-      row.hidden = !(matchesStatus && matchesVendor);
+  // ================= Collections list (GET /collections) =================
+  var COLLECTIONS = [
+    { title: 'Summer Essentials', description: 'Warm-weather favorites across apparel and accessories.', count: 12 },
+    { title: 'New Arrivals', description: 'The latest drops, updated weekly.', count: 8 },
+    { title: 'Trail & Outdoor', description: 'Gear built for the trail.', count: 15 }
+  ];
+  var collectionsPager = setupPagination(
+    document.getElementById('collections-pagination'),
+    function () { return COLLECTIONS.length; },
+    function () { renderCollectionsTable(); }
+  );
+  function renderCollectionsTable() {
+    var start = (collectionsPager.state.page - 1) * collectionsPager.state.pageSize;
+    var pageItems = COLLECTIONS.slice(start, start + collectionsPager.state.pageSize);
+    var tbody = document.getElementById('collections-tbody');
+    tbody.innerHTML = '';
+    pageItems.forEach(function (c) {
+      var tr = document.createElement('tr');
+      var titleTd = document.createElement('td'); titleTd.className = 'cell-title'; titleTd.textContent = c.title;
+      var descTd = document.createElement('td'); descTd.className = 'cell-muted'; descTd.textContent = c.description;
+      var countTd = document.createElement('td'); countTd.className = 'num'; countTd.textContent = String(c.count);
+      var actionTd = document.createElement('td');
+      var viewBtn = document.createElement('button');
+      viewBtn.type = 'button';
+      viewBtn.className = 'btn btn-sm btn-secondary';
+      viewBtn.setAttribute('data-nav', 'collections-detail');
+      viewBtn.textContent = 'View';
+      actionTd.appendChild(viewBtn);
+      tr.appendChild(titleTd); tr.appendChild(descTd); tr.appendChild(countTd); tr.appendChild(actionTd);
+      tbody.appendChild(tr);
     });
+    collectionsPager.render();
   }
-
-  // ---- Tabs on Product detail ----
-  document.querySelectorAll('.tab').forEach(function (tab) {
-    tab.addEventListener('click', function () {
-      var name = tab.getAttribute('data-tab');
-      document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t === tab); });
-      document.querySelectorAll('[data-tab-panel]').forEach(function (panel) {
-        panel.classList.toggle('active', panel.getAttribute('data-tab-panel') === name);
-      });
-    });
-  });
+  renderCollectionsTable();
 
   // ---- Add product to collection (demo only) ----
   document.getElementById('cd-add-btn').addEventListener('click', function () {
@@ -838,9 +1004,247 @@
     var row = document.createElement('tr');
     var position = tbody.children.length + 1;
     row.innerHTML = '<td class="num cell-muted">' + position + '</td><td class="cell-title"></td><td>—</td><td><span class="badge badge-warning">Draft</span></td>' +
-      '<td><button class="btn-close btn-close-sm" aria-label="Remove from collection" data-action="remove-collection-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></td>';
+      '<td><button class="btn-close btn-close-sm" aria-label="Remove from collection" data-action="remove-collection-row">' + ICON_X + '</button></td>';
     row.querySelector('.cell-title').textContent = value;
     tbody.appendChild(row);
     input.value = '';
   });
+
+  // ================= Tabs on Product detail =================
+  document.querySelectorAll('.tab').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      var name = tab.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function (t) { t.classList.toggle('active', t === tab); });
+      document.querySelectorAll('[data-tab-panel]').forEach(function (panel) {
+        panel.classList.toggle('active', panel.getAttribute('data-tab-panel') === name);
+      });
+    });
+  });
+
+  // ================= Generic inline-editable table (Options / Variants) =================
+  // Shared by both tabs: an "Add" button appends a draft row already in edit mode;
+  // each row gets Edit/Delete, and edit mode swaps its cells for inputs with Save/Cancel.
+  function createEditableTable(config) {
+    var editingIndex = null;
+    var tbody = document.getElementById(config.tbodyId);
+
+    function render() {
+      tbody.innerHTML = '';
+      config.data.forEach(function (row, index) {
+        tbody.appendChild(index === editingIndex ? buildEditRow(row, index) : buildViewRow(row, index));
+      });
+    }
+
+    function buildViewRow(row, index) {
+      var tr = document.createElement('tr');
+      config.columns.forEach(function (col) {
+        var td = document.createElement('td');
+        if (col.numeric) td.className = 'num' + (col.muted ? ' cell-muted' : '');
+        td.textContent = col.format ? col.format(row[col.key]) : (row[col.key] == null ? '' : row[col.key]);
+        tr.appendChild(td);
+      });
+      var actionsTd = document.createElement('td');
+      var wrap = document.createElement('div');
+      wrap.className = 'row-actions';
+      var editBtn = document.createElement('button');
+      editBtn.type = 'button'; editBtn.className = 'icon-btn'; editBtn.setAttribute('aria-label', 'Edit'); editBtn.innerHTML = ICON_PENCIL;
+      editBtn.addEventListener('click', function () { editingIndex = index; render(); });
+      var delBtn = document.createElement('button');
+      delBtn.type = 'button'; delBtn.className = 'icon-btn'; delBtn.setAttribute('aria-label', 'Delete'); delBtn.innerHTML = ICON_TRASH;
+      delBtn.addEventListener('click', function () {
+        var label = config.rowLabel(row);
+        config.data.splice(index, 1);
+        editingIndex = null;
+        render();
+        flashAlert(document.getElementById('view-products-detail'), 'success', config.name + ' "' + label + '" deleted.');
+      });
+      wrap.appendChild(editBtn);
+      wrap.appendChild(delBtn);
+      actionsTd.appendChild(wrap);
+      tr.appendChild(actionsTd);
+      return tr;
+    }
+
+    function buildEditRow(row, index) {
+      var tr = document.createElement('tr');
+      var inputs = {};
+      config.columns.forEach(function (col) {
+        var td = document.createElement('td');
+        var input = document.createElement('input');
+        input.type = col.inputType || 'text';
+        input.className = 'cell-input-sm';
+        input.value = row[col.key] == null ? '' : row[col.key];
+        if (col.placeholder) input.placeholder = col.placeholder;
+        inputs[col.key] = input;
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      var actionsTd = document.createElement('td');
+      var wrap = document.createElement('div');
+      wrap.className = 'row-actions';
+      var saveBtn = document.createElement('button');
+      saveBtn.type = 'button'; saveBtn.className = 'btn btn-sm btn-primary'; saveBtn.textContent = 'Save';
+      saveBtn.addEventListener('click', function () {
+        config.columns.forEach(function (col) {
+          var val = inputs[col.key].value;
+          row[col.key] = col.inputType === 'number' ? (val === '' ? null : Number(val)) : val;
+        });
+        delete row._draft;
+        var label = config.rowLabel(row);
+        editingIndex = null;
+        render();
+        flashAlert(document.getElementById('view-products-detail'), 'success', config.name + ' "' + label + '" saved.');
+      });
+      var cancelBtn = document.createElement('button');
+      cancelBtn.type = 'button'; cancelBtn.className = 'btn btn-sm btn-secondary'; cancelBtn.textContent = 'Cancel';
+      cancelBtn.addEventListener('click', function () {
+        if (row._draft) config.data.splice(index, 1);
+        editingIndex = null;
+        render();
+      });
+      wrap.appendChild(saveBtn);
+      wrap.appendChild(cancelBtn);
+      actionsTd.appendChild(wrap);
+      tr.appendChild(actionsTd);
+      return tr;
+    }
+
+    document.getElementById(config.addBtnId).addEventListener('click', function () {
+      var blank = config.emptyRow();
+      blank._draft = true;
+      config.data.push(blank);
+      editingIndex = config.data.length - 1;
+      render();
+    });
+
+    render();
+  }
+
+  function formatMoneyOrDash(v) { return v == null || v === '' ? '—' : '$' + Number(v).toFixed(2); }
+
+  var OPTIONS_DATA = [
+    { name: 'Size', position: 1 },
+    { name: 'Color', position: 2 }
+  ];
+  createEditableTable({
+    name: 'Option',
+    data: OPTIONS_DATA,
+    tbodyId: 'options-tbody',
+    addBtnId: 'add-option-btn',
+    columns: [
+      { key: 'name', label: 'Name', placeholder: 'e.g. Size' },
+      { key: 'position', label: 'Position', inputType: 'number', numeric: true }
+    ],
+    emptyRow: function () { return { name: '', position: OPTIONS_DATA.length + 1 }; },
+    rowLabel: function (row) { return row.name || 'Untitled'; }
+  });
+
+  var VARIANTS_DATA = [
+    { sku: 'NR-TRS-9-SLATE', title: '9 / Slate', price: 89, compareAt: 110, position: 1 },
+    { sku: 'NR-TRS-10-SLATE', title: '10 / Slate', price: 89, compareAt: 110, position: 2 },
+    { sku: 'NR-TRS-9-MOSS', title: '9 / Moss', price: 92, compareAt: null, position: 3 },
+    { sku: 'NR-TRS-10-MOSS', title: '10 / Moss', price: 92, compareAt: null, position: 4 }
+  ];
+  createEditableTable({
+    name: 'Variant',
+    data: VARIANTS_DATA,
+    tbodyId: 'variants-tbody',
+    addBtnId: 'add-variant-btn',
+    columns: [
+      { key: 'sku', label: 'SKU', placeholder: 'e.g. NR-TRS-11-SLATE' },
+      { key: 'title', label: 'Title', placeholder: 'e.g. 11 / Slate' },
+      { key: 'price', label: 'Price', inputType: 'number', numeric: true, format: formatMoneyOrDash },
+      { key: 'compareAt', label: 'Compare-at', inputType: 'number', numeric: true, muted: true, format: formatMoneyOrDash },
+      { key: 'position', label: 'Position', inputType: 'number', numeric: true }
+    ],
+    emptyRow: function () { return { sku: '', title: '', price: null, compareAt: null, position: VARIANTS_DATA.length + 1 }; },
+    rowLabel: function (row) { return row.sku || row.title || 'Untitled'; }
+  });
+
+  // ================= Images tab: real file upload via FileReader (no external hotlinking) =================
+  var IMAGES_DATA = [
+    { alt: 'side.jpg', position: 1, src: null },
+    { alt: 'sole.jpg', position: 2, src: null },
+    { alt: 'top.jpg', position: 3, src: null },
+    { alt: 'moss.jpg', position: 4, src: null }
+  ];
+  function renderGallery() {
+    var gallery = document.getElementById('images-gallery');
+    gallery.innerHTML = '';
+    IMAGES_DATA.forEach(function (img, index) {
+      var figure = document.createElement('div');
+      figure.className = 'gallery-figure';
+      var tile = document.createElement('div');
+      tile.className = 'gallery-item';
+
+      var posBadge = document.createElement('span');
+      posBadge.className = 'gallery-pos';
+      posBadge.textContent = String(img.position);
+      tile.appendChild(posBadge);
+
+      if (img.src) {
+        var imageEl = document.createElement('img');
+        imageEl.src = img.src;
+        imageEl.alt = img.alt;
+        tile.appendChild(imageEl);
+      } else {
+        var placeholder = document.createElement('div');
+        placeholder.innerHTML = ICON_IMAGE_PLACEHOLDER;
+        tile.appendChild(placeholder.firstChild);
+      }
+
+      var removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn-close btn-close-sm gallery-remove';
+      removeBtn.setAttribute('aria-label', 'Remove image');
+      removeBtn.innerHTML = ICON_X;
+      removeBtn.addEventListener('click', function () {
+        IMAGES_DATA.splice(index, 1);
+        renderGallery();
+        flashAlert(document.getElementById('view-products-detail'), 'success', 'Image removed.');
+      });
+      tile.appendChild(removeBtn);
+
+      var altInput = document.createElement('input');
+      altInput.type = 'text';
+      altInput.value = img.alt;
+      altInput.placeholder = 'Alt text';
+      altInput.addEventListener('change', function () {
+        img.alt = altInput.value;
+        if (tile.querySelector('img')) tile.querySelector('img').alt = altInput.value;
+      });
+
+      figure.appendChild(tile);
+      figure.appendChild(altInput);
+      gallery.appendChild(figure);
+    });
+
+    var addFigure = document.createElement('div');
+    addFigure.className = 'gallery-figure';
+    var addTile = document.createElement('button');
+    addTile.type = 'button';
+    addTile.className = 'gallery-item add-tile';
+    var plus = document.createElement('div');
+    plus.innerHTML = ICON_PLUS;
+    var label = document.createElement('span');
+    label.textContent = 'Add image';
+    addTile.appendChild(plus.firstChild);
+    addTile.appendChild(label);
+    addTile.addEventListener('click', function () { document.getElementById('image-file-input').click(); });
+    addFigure.appendChild(addTile);
+    gallery.appendChild(addFigure);
+  }
+  document.getElementById('image-file-input').addEventListener('change', function (event) {
+    var file = event.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      IMAGES_DATA.push({ alt: file.name, position: IMAGES_DATA.length + 1, src: reader.result });
+      renderGallery();
+      flashAlert(document.getElementById('view-products-detail'), 'success', 'Image added.');
+    };
+    reader.readAsDataURL(file);
+    event.target.value = '';
+  });
+  renderGallery();
 </script>
