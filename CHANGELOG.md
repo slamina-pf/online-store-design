@@ -4,6 +4,27 @@ All notable changes to these design mockups are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/);
 versions follow [Semantic Versioning](https://semver.org/).
 
+## [0.3.0] - 2026-09-29
+
+### Added
+- Collections Create/Edit view (`POST`/`PATCH /collections`): title, slug,
+  description form, matching the Products Create/Edit pattern. "Add
+  collection" and "Edit collection" previously did nothing
+  (`data-action="noop"`) — both now navigate here and Save actually adds
+  the collection and returns to the list with a confirmation toast.
+- "Save product" is now wired up too (it was equally dead before) — adds
+  the product and returns to the Products list with a toast, for
+  consistency with the newly-fixed collection flow.
+
+### Changed
+- Layout is now full-width: `.content` no longer caps at `1040px`, so the
+  sidebar and every table/card stretch to fill the page. `html`/`body`
+  get an explicit `height: 100%` so the sidebar's full-height styling
+  actually resolves against the viewport instead of a collapsed parent.
+- Create/Edit forms (Products, Collections) are capped at a readable
+  `640px` via a new `.form-card` wrapper, since a form's inputs — unlike
+  tables — don't benefit from stretching edge-to-edge on a wide screen.
+
 ## [0.2.0] - 2026-09-29
 
 ### Added

@@ -37,6 +37,7 @@
   }
 
   * { box-sizing: border-box; }
+  html, body { height: 100%; }
   body {
     margin: 0;
     background: var(--surface);
@@ -48,7 +49,7 @@
   p { margin: 0; }
   button { font-family: inherit; }
 
-  .shell { display: flex; min-height: 100%; }
+  .shell { display: flex; min-height: 100%; width: 100%; }
 
   /* ---- Sidebar ---- */
   .sidebar {
@@ -79,7 +80,8 @@
   .nav-link svg { flex: none; width: 16px; height: 16px; }
 
   /* ---- Main content ---- */
-  .content { flex: 1; min-width: 0; padding: 1.75rem 2rem 3rem; max-width: 1040px; }
+  .content { flex: 1; min-width: 0; padding: 1.75rem 2rem 3rem; }
+  .form-card { max-width: 640px; }
   .view-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
   .view-header h1 { font-size: 1.375rem; font-weight: 700; }
   .view-subtitle { color: var(--ink-muted); font-size: 0.8125rem; margin-top: 0.25rem; }
@@ -361,53 +363,88 @@
         <li class="current" aria-current="page">New product</li>
       </ul>
 
-      <div class="alert alert-info" id="new-product-tip">
-        <span>Changes are saved as a draft until you set the status to Active and publish.</span>
-        <button class="btn-close btn-close-sm" aria-label="Dismiss" data-dismiss-alert>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
+      <div class="form-card">
+        <div class="alert alert-info" id="new-product-tip">
+          <span>Changes are saved as a draft until you set the status to Active and publish.</span>
+          <button class="btn-close btn-close-sm" aria-label="Dismiss" data-dismiss-alert>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
 
-      <div class="card card-pad">
-        <div class="form-grid">
-          <div class="field span-2">
-            <label for="np-title">Title</label>
-            <input type="text" id="np-title" placeholder="e.g. Merino Wool Beanie">
-          </div>
-          <div class="field">
-            <label for="np-slug">Slug</label>
-            <input type="text" id="np-slug" placeholder="merino-wool-beanie">
-          </div>
-          <div class="field">
-            <label for="np-vendor">Vendor</label>
-            <input type="text" id="np-vendor" placeholder="e.g. Northbound Gear">
-          </div>
-          <div class="field">
-            <label for="np-type">Product type</label>
-            <input type="text" id="np-type" placeholder="e.g. Accessories">
-          </div>
-          <div class="field">
-            <label for="np-status">Status</label>
-            <select id="np-status">
-              <option value="draft">Draft</option>
-              <option value="active">Active</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
-          <div class="field span-2">
-            <label for="np-desc">Description</label>
-            <textarea id="np-desc" placeholder="A short description shown on the product page."></textarea>
-          </div>
-          <div class="field">
-            <label for="np-pub">Published at</label>
-            <input type="date" id="np-pub">
+        <div class="card card-pad">
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="np-title">Title</label>
+              <input type="text" id="np-title" placeholder="e.g. Merino Wool Beanie">
+            </div>
+            <div class="field">
+              <label for="np-slug">Slug</label>
+              <input type="text" id="np-slug" placeholder="merino-wool-beanie">
+            </div>
+            <div class="field">
+              <label for="np-vendor">Vendor</label>
+              <input type="text" id="np-vendor" placeholder="e.g. Northbound Gear">
+            </div>
+            <div class="field">
+              <label for="np-type">Product type</label>
+              <input type="text" id="np-type" placeholder="e.g. Accessories">
+            </div>
+            <div class="field">
+              <label for="np-status">Status</label>
+              <select id="np-status">
+                <option value="draft">Draft</option>
+                <option value="active">Active</option>
+                <option value="archived">Archived</option>
+              </select>
+            </div>
+            <div class="field span-2">
+              <label for="np-desc">Description</label>
+              <textarea id="np-desc" placeholder="A short description shown on the product page."></textarea>
+            </div>
+            <div class="field">
+              <label for="np-pub">Published at</label>
+              <input type="date" id="np-pub">
+            </div>
           </div>
         </div>
-      </div>
 
-      <div style="display:flex; gap:0.75rem; margin-top:1.25rem;">
-        <button class="btn btn-md btn-primary" data-action="save-product">Save product</button>
-        <button class="btn btn-md btn-secondary" data-nav="products-list">Cancel</button>
+        <div style="display:flex; gap:0.75rem; margin-top:1.25rem;">
+          <button class="btn btn-md btn-primary" data-action="save-product">Save product</button>
+          <button class="btn btn-md btn-secondary" data-nav="products-list">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= COLLECTIONS — CREATE/EDIT (POST/PATCH /collections) ================= -->
+    <section id="view-collections-new" data-view hidden>
+      <ul class="crumb">
+        <li><a data-nav="collections-list">Collections</a></li>
+        <li aria-hidden="true">/</li>
+        <li class="current" aria-current="page">New collection</li>
+      </ul>
+
+      <div class="form-card">
+        <div class="card card-pad">
+          <div class="form-grid">
+            <div class="field span-2">
+              <label for="nc-title">Title</label>
+              <input type="text" id="nc-title" placeholder="e.g. Summer Essentials">
+            </div>
+            <div class="field span-2">
+              <label for="nc-slug">Slug</label>
+              <input type="text" id="nc-slug" placeholder="summer-essentials">
+            </div>
+            <div class="field span-2">
+              <label for="nc-desc">Description</label>
+              <textarea id="nc-desc" placeholder="What ties these products together?"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:1.25rem;">
+          <button class="btn btn-md btn-primary" data-action="save-collection">Save collection</button>
+          <button class="btn btn-md btn-secondary" data-nav="collections-list">Cancel</button>
+        </div>
       </div>
     </section>
 
@@ -496,7 +533,7 @@
           <h1>Collections</h1>
           <p class="view-subtitle">3 collections</p>
         </div>
-        <button class="btn btn-md btn-primary" data-action="noop">Add collection</button>
+        <button class="btn btn-md btn-primary" data-nav="collections-new">Add collection</button>
       </div>
 
       <div class="card">
@@ -544,7 +581,7 @@
           <h1>Trail &amp; Outdoor</h1>
           <p class="view-subtitle">trail-outdoor · Gear built for the trail.</p>
         </div>
-        <button class="btn btn-md btn-secondary" data-action="noop">Edit collection</button>
+        <button class="btn btn-md btn-secondary" data-nav="collections-new">Edit collection</button>
       </div>
 
       <div class="card">
@@ -630,7 +667,7 @@
   })();
 
   // ================= View routing =================
-  var routes = ['products-list', 'products-new', 'products-detail', 'collections-list', 'collections-detail'];
+  var routes = ['products-list', 'products-new', 'products-detail', 'collections-list', 'collections-new', 'collections-detail'];
   function showView(route) {
     if (routes.indexOf(route) === -1) route = 'products-list';
     routes.forEach(function (r) {
@@ -1008,6 +1045,44 @@
     row.querySelector('.cell-title').textContent = value;
     tbody.appendChild(row);
     input.value = '';
+  });
+
+  // ================= Save product / Save collection (Create+Edit forms) =================
+  function slugify(text) {
+    return text.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'untitled';
+  }
+  document.addEventListener('click', function (event) {
+    var saveProductBtn = event.target.closest('[data-action="save-product"]');
+    if (saveProductBtn) {
+      var title = document.getElementById('np-title').value.trim() || 'Untitled product';
+      var vendor = document.getElementById('np-vendor').value.trim() || 'Unknown vendor';
+      PRODUCTS.push({
+        title: title,
+        slug: document.getElementById('np-slug').value.trim() || slugify(title),
+        vendor: vendor,
+        status: document.getElementById('np-status').value,
+        priceLabel: '—',
+        variantCount: 0
+      });
+      productsPager.state.page = Math.max(1, Math.ceil(filteredProducts().length / productsPager.state.pageSize));
+      renderProductsTable();
+      showView('products-list');
+      flashAlert(document.getElementById('view-products-list'), 'success', title + ' was saved.');
+    }
+
+    var saveCollectionBtn = event.target.closest('[data-action="save-collection"]');
+    if (saveCollectionBtn) {
+      var collectionTitle = document.getElementById('nc-title').value.trim() || 'Untitled collection';
+      COLLECTIONS.push({
+        title: collectionTitle,
+        description: document.getElementById('nc-desc').value.trim() || 'No description yet.',
+        count: 0
+      });
+      collectionsPager.state.page = Math.max(1, Math.ceil(COLLECTIONS.length / collectionsPager.state.pageSize));
+      renderCollectionsTable();
+      showView('collections-list');
+      flashAlert(document.getElementById('view-collections-list'), 'success', collectionTitle + ' was saved.');
+    }
   });
 
   // ================= Tabs on Product detail =================
